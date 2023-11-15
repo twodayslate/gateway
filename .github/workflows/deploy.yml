@@ -6,9 +6,27 @@ on:
       - main
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Test/Lint
+    strategy:
+      matrix:
+        node-version: [16, 18]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm ci
+    - run: npm run test
+    - run: npm run lint
+      env:
+        CI: true
   deploy:
     runs-on: ubuntu-latest
     name: Deploy
+    needs: build
     steps:
       - uses: actions/checkout@v3
       - name: Deploy
