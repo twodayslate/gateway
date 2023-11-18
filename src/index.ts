@@ -1,33 +1,69 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import { Hono } from "hono";
+import { Error, ServiceAuthType } from "./types";
+import { streamResponse } from "./utils";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Env {
-  // Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
-  // MY_KV_NAMESPACE: KVNamespace;
-  //
-  // Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-  // MY_DURABLE_OBJECT: DurableObjectNamespace;
-  //
-  // Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-  // MY_BUCKET: R2Bucket;
-  //
-  // Example binding to a Service. Learn more at https://developers.cloudflare.com/workers/runtime-apis/service-bindings/
-  // MY_SERVICE: Fetcher;
-  //
-  // Example binding to a Queue. Learn more at https://developers.cloudflare.com/queues/javascript-apis/
-  // MY_QUEUE: Queue;
-}
+const app = new Hono<{ Bindings: Record<string, never | null> }>();
+app
+  .all("*",
+    async (context) => {
+      // Clone the request
+      const clone = context.req.raw.clone();
 
-export default {
-  async fetch (request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    return new Response('Hello World!')
-  }
-}
+      // Get the x-gateway-* headers
+      const xGatewayServiceHost = clone.headers.get("x-gateway-service-host");
+      const xGatewayServiceToken = clone.headers.get("x-gateway-service-token");
+      const xGatewayServiceAuthKey = clone.headers.get("x-gateway-service-auth-key");
+      const xGatewayServiceAuthType = clone.headers.get("x-gateway-service-auth-type");
+
+      // Create a new URL object from the cloned request URL
+      const url = new URL(clone.url);
+
+      if (!xGatewayServiceHost) {
+        return context.json(<Error>{ error: "x-gateway-service-host header is required." }, 400);
+      }
+
+      // Set the host to the proxied service host
+      url.host = xGatewayServiceHost;
+
+      // If the service token is not provided in the request headers, try to get it from the environment variables.
+      // The environment variable name is the service host name in uppercase with all non-alphanumeric characters replaced with "_".
+      const apiKey = `${url.host.replace(/[^a-zA-Z0-9]/g, "_").toUpperCase()}_API_KEY`;
+      const token = xGatewayServiceToken || context.env[apiKey];
+
+      if (!token) {
+        return context.json(<Error>{
+          error: "Cannot find API key for proxied service! Either provide it in the request headers or set it as an environment variable."
+        }, 400);
+      }
+
+      // remove all x-gateway-* headers from the request
+      const filteredHeaders = Array
+        .from(clone.headers.entries())
+        .filter(([key]) => !key.startsWith("x-gateway-"));
+
+      // create a new headers object with the filtered headers
+      const headers = new Headers(filteredHeaders);
+
+      if (xGatewayServiceAuthKey && xGatewayServiceAuthType === ServiceAuthType.HEADER) {
+        const value = xGatewayServiceAuthKey.toLowerCase() === "authorization" ? `Bearer ${token}` : token;
+        headers.append(xGatewayServiceAuthKey, value);
+      } else if (xGatewayServiceAuthKey && xGatewayServiceAuthType === ServiceAuthType.QUERY) {
+        url.searchParams.append(xGatewayServiceAuthKey, token);
+      }
+
+      // Make the request to the designated service
+      const response = await fetch(url, {
+        method: clone.method,
+        body: JSON.stringify(await clone.json()),
+        headers: headers,
+      });
+
+      // If the response is not a stream forward it as it is.
+      if (response.headers.get("Content-Type") !== "text/event-stream") {
+        return response;
+      }
+      // If the response is a stream, forward it as a stream.
+      return streamResponse(response.body);
+    });
+
+export default app;
