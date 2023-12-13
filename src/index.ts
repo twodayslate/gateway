@@ -54,7 +54,7 @@ app
       // Make the request to the designated service
       const response = await fetch(url, {
         method: clone.method,
-        body: JSON.stringify(await clone.json()),
+        body: clone.body ? JSON.stringify(await clone.json()) : null,
         headers: headers,
       });
 
