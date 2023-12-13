@@ -1,10 +1,11 @@
 import app from "../src";
-import { BINDINGS, getMockOpenAI } from "./utils";
+import { BINDINGS, getMockOpenAI, getMockShodan } from "./utils";
 
 describe("Test if the request is proxied to the designated service", () => {
   // Set the API key for proxied service in env variables
   beforeEach(() => {
     BINDINGS["API_OPENAI_COM_API_KEY"] = "sk-1234567890";
+    BINDINGS["API_SHODAN_IO_API_KEY"] = "shodan-api-key";
   });
 
   // Intercept the request to the proxied service when the API key is provided in the request headers
@@ -62,6 +63,19 @@ describe("Test if the request is proxied to the designated service", () => {
           "messages": [{"role": "user", "content": "Say this is a test!"}],
           "temperature": 0.7
         }),
+      })
+      .reply(200);
+  });
+
+  // Intercept the request to be proxied to api.shodan.io
+  beforeEach(() => {
+    getMockShodan()
+      .intercept({
+        method: "GET",
+        path: "/shodan/host/1.1.1.1",
+        query: {
+          "key": BINDINGS["API_SHODAN_IO_API_KEY"],
+        },
       })
       .reply(200);
   });
@@ -207,6 +221,24 @@ describe("Test if the request is proxied to the designated service", () => {
           "messages": [{"role": "user", "content": "Say this is a test!"}],
           "temperature": 0.7
         }),
+      },
+      BINDINGS,
+      new ExecutionContext(),
+    );
+
+    expect(response.status).toBe(200);
+  });
+
+  it("should return 200 for request proxied to api.shodan.io", async () => {
+    const response = await app.request(
+      "/shodan/host/1.1.1.1",
+      {
+        method: "GET",
+        headers: {
+          "x-gateway-service-host": "api.shodan.io",
+          "x-gateway-service-auth-type": "QUERY",
+          "x-gateway-service-auth-key": "key",
+        },
       },
       BINDINGS,
       new ExecutionContext(),
