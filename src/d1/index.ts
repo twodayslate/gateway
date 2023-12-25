@@ -7,7 +7,7 @@ class D1 {
   constructor(readonly context: Context<{ Bindings: Bindings }>) {
   }
 
-  async saveAnalyticsParams() {
+  async saveAnalyticsParams(response: Response) {
     const userAgent = this.context.req.raw.headers.get("user-agent");
     const cfConnectingIP = this.context.req.raw.headers.get("cf-connecting-ip");
     const cfIPCountry = this.context.req.raw.headers.get("cf-ipcountry");
@@ -27,8 +27,9 @@ class D1 {
                               identifier_for_vendor,
                               bundle_identifier,
                               url,
-                              headers)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+                              headers,
+                              status_code)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
     `)
       .bind(
         userAgent,
@@ -40,6 +41,7 @@ class D1 {
         xBundleIdentifier,
         url,
         headers,
+        response.status,
       ).run();
   }
 

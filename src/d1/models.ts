@@ -11,4 +11,5 @@ export interface RequestModel {
   bundle_identifier: string;
   url: string;
   headers: string;
+  status_code: number;
 }

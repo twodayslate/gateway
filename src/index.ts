@@ -61,7 +61,7 @@ app
       });
 
       // Save analytics params
-      context.executionCtx.waitUntil(new D1(context).saveAnalyticsParams());
+      context.executionCtx.waitUntil(new D1(context).saveAnalyticsParams(response));
 
       // If the response is not a stream forward it as it is.
       if (response.headers.get("Content-Type") !== "text/event-stream") {

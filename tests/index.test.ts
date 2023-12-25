@@ -141,6 +141,7 @@ describe("Test if the request is proxied to the designated service", () => {
       .first();
 
     expect(request.identifier_for_vendor).toBe("xxx-yyy-zzz");
+    expect(request.status_code).toBe(200);
   });
 
   it("should use the API key provided in headers to proxy the request to designated service", async () => {
@@ -179,6 +180,7 @@ describe("Test if the request is proxied to the designated service", () => {
       .first();
 
     expect(request.identifier_for_vendor).toBe("aaa-bbb-ccc");
+    expect(request.status_code).toBe(200);
   });
 
   it("should throw and error if the API key is not found in header and is not set in env.", async () => {
@@ -242,6 +244,7 @@ describe("Test if the request is proxied to the designated service", () => {
       .first();
 
     expect(request.identifier_for_vendor).toBe("zzz-yyy-xxx");
+    expect(request.status_code).toBe(200);
   });
 
   it("should set the API key in HEADER if x-gateway-service-auth-type is set to HEADER and x-gateway-service-auth-key is not set to Authorization", async () => {
@@ -278,6 +281,7 @@ describe("Test if the request is proxied to the designated service", () => {
       .first();
 
     expect(request.identifier_for_vendor).toBe("ppp-qqq-rrr");
+    expect(request.status_code).toBe(200);
   });
 
   it("should return 200 for request proxied to api.shodan.io", async () => {
@@ -309,6 +313,7 @@ describe("Test if the request is proxied to the designated service", () => {
       .first();
 
     expect(request.identifier_for_vendor).toBe("ccc-bbb-aaa");
+    expect(request.status_code).toBe(200);
   });
 
   it("should have all the successful request logged in the database", async () => {

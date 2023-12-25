@@ -14,6 +14,7 @@ CREATE TABLE requests
     bundle_identifier     TEXT,
     url                   TEXT,
     headers               JSON,
+    status_code           INTEGER,
     created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
