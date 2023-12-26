@@ -3,8 +3,6 @@ main = "src/index.ts"
 compatibility_date = "2023-10-30"
 
 ############################# LOCAL #################################
-[vars]
-CF_URL = "http://localhost"
 
 [[d1_databases]]
 binding = "DB"
