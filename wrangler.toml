@@ -1,3 +1,26 @@
 name = "gateway"
 main = "src/index.ts"
 compatibility_date = "2023-10-30"
+
+############################# LOCAL #################################
+[vars]
+CF_URL = "http://localhost"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "gateway_local"
+database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+migrations_table = "migrations"
+migrations_dir = "migrations"
+
+############################# PRODUCTION #############################
+
+[env.production]
+name = "gateway"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "gateway"
+database_id = "bea25784-0c7b-46d3-a064-47b6ccafa92e"
+migrations_table = "migrations"
+migrations_dir = "migrations"

@@ -1,8 +1,12 @@
 import { Hono } from "hono";
 import { Error, ServiceAuthType } from "./types";
 import { streamResponse } from "./utils";
+import { Bindings } from "./bindings";
+import D1 from "./d1";
+import HeaderUtils from "./header_utils";
 
-const app = new Hono<{ Bindings: Record<string, never | null> }>();
+const app = new Hono<{ Bindings: Bindings }>();
+
 app
   .all("*",
     async (context) => {
@@ -37,9 +41,7 @@ app
       }
 
       // remove all x-gateway-* headers from the request
-      const filteredHeaders = Array
-        .from(clone.headers.entries())
-        .filter(([key]) => !key.startsWith("x-gateway-"));
+      const filteredHeaders = new HeaderUtils(clone.headers).removeGatewayHeaders().get();
 
       // create a new headers object with the filtered headers
       const headers = new Headers(filteredHeaders);
@@ -57,6 +59,9 @@ app
         body: clone.body ? JSON.stringify(await clone.json()) : null,
         headers: headers,
       });
+
+      // Save analytics params
+      context.executionCtx.waitUntil(new D1(context).saveAnalyticsParams(response));
 
       // If the response is not a stream forward it as it is.
       if (response.headers.get("Content-Type") !== "text/event-stream") {
