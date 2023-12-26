@@ -34,3 +34,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           preCommands: npx wrangler d1 migrations apply gateway --env production
+          command: npx wrangler deploy --env production
