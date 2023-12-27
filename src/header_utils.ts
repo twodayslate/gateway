@@ -8,10 +8,7 @@ class HeaderUtils {
    * A function to remove sensitive headers from a Headers object.
    */
   removeSensitiveHeaders() {
-    const sensitiveHeaders = [
-      "Authorization",
-      "x-gateway-service-token"
-    ];
+    const sensitiveHeaders = ["Authorization", "x-gateway-service-token"];
 
     for (const header of sensitiveHeaders) {
       this.headers.delete(header);
@@ -44,7 +41,6 @@ class HeaderUtils {
   toJsonString() {
     return JSON.stringify(this.toJsonObject());
   }
-
 }
 
 export default HeaderUtils;

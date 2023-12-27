@@ -1,4 +1,3 @@
-
 // RequestModel is the type of the database table called "requests".
 export interface RequestModel {
   id: number;
@@ -12,4 +11,5 @@ export interface RequestModel {
   url: string;
   headers: string;
   status_code: number;
+  error: string;
 }

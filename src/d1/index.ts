@@ -3,11 +3,9 @@ import { Bindings } from "../bindings";
 import HeaderUtils from "../header_utils";
 
 class D1 {
+  constructor(readonly context: Context<{ Bindings: Bindings }>) {}
 
-  constructor(readonly context: Context<{ Bindings: Bindings }>) {
-  }
-
-  async saveAnalyticsParams(response: Response) {
+  async saveAnalyticsParams() {
     const userAgent = this.context.req.raw.headers.get("user-agent");
     const cfConnectingIP = this.context.req.raw.headers.get("cf-connecting-ip");
     const cfIPCountry = this.context.req.raw.headers.get("cf-ipcountry");
@@ -17,8 +15,10 @@ class D1 {
     const xBundleIdentifier = this.context.req.raw.headers.get("x-gateway-bundle-identifier");
     const url = this.context.req.raw.url;
     const headers = new HeaderUtils(this.context.req.raw.headers).removeSensitiveHeaders().toJsonString();
+    const response = this.context.res.clone();
 
-    await this.context.env.DB.prepare(`
+    await this.context.env.DB.prepare(
+      `
         INSERT INTO requests (user_agent,
                               cf_connecting_ip,
                               cf_ip_country,
@@ -28,9 +28,12 @@ class D1 {
                               bundle_identifier,
                               url,
                               headers,
-                              status_code)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
-    `)
+                              status_code,
+                              error
+        )
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)
+    `,
+    )
       .bind(
         userAgent,
         cfConnectingIP,
@@ -42,10 +45,10 @@ class D1 {
         url,
         headers,
         response.status,
-      ).run();
+        response.ok ? null : await response.text(),
+      )
+      .run();
   }
-
 }
-
 
 export default D1;

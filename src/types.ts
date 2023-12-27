@@ -5,4 +5,4 @@ export enum ServiceAuthType {
 
 export type Error = {
   error: string;
-}
+};

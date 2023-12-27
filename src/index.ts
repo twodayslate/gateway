@@ -2,73 +2,73 @@ import { Hono } from "hono";
 import { Error, ServiceAuthType } from "./types";
 import { streamResponse } from "./utils";
 import { Bindings } from "./bindings";
-import D1 from "./d1";
 import HeaderUtils from "./header_utils";
+import analytics from "./middleware/analytics";
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-app
-  .all("*",
-    async (context) => {
-      // Clone the request
-      const clone = context.req.raw.clone();
+app.use("*", analytics());
 
-      // Get the x-gateway-* headers
-      const xGatewayServiceHost = clone.headers.get("x-gateway-service-host");
-      const xGatewayServiceToken = clone.headers.get("x-gateway-service-token");
-      const xGatewayServiceAuthKey = clone.headers.get("x-gateway-service-auth-key");
-      const xGatewayServiceAuthType = clone.headers.get("x-gateway-service-auth-type");
+app.all("*", async (context) => {
+  // Clone the request
+  const clone = context.req.raw.clone();
 
-      // Create a new URL object from the cloned request URL
-      const url = new URL(clone.url);
+  // Get the x-gateway-* headers
+  const xGatewayServiceHost = clone.headers.get("x-gateway-service-host");
+  const xGatewayServiceToken = clone.headers.get("x-gateway-service-token");
+  const xGatewayServiceAuthKey = clone.headers.get("x-gateway-service-auth-key");
+  const xGatewayServiceAuthType = clone.headers.get("x-gateway-service-auth-type");
 
-      if (!xGatewayServiceHost) {
-        return context.json(<Error>{ error: "x-gateway-service-host header is required." }, 400);
-      }
+  // Create a new URL object from the cloned request URL
+  const url = new URL(clone.url);
 
-      // Set the host to the proxied service host
-      url.host = xGatewayServiceHost;
+  if (!xGatewayServiceHost) {
+    return context.json(<Error>{ error: "x-gateway-service-host header is required." }, 400);
+  }
 
-      // If the service token is not provided in the request headers, try to get it from the environment variables.
-      // The environment variable name is the service host name in uppercase with all non-alphanumeric characters replaced with "_".
-      const apiKey = `${url.host.replace(/[^a-zA-Z0-9]/g, "_").toUpperCase()}_API_KEY`;
-      const token = xGatewayServiceToken || context.env[apiKey];
+  // Set the host to the proxied service host
+  url.host = xGatewayServiceHost;
 
-      if (!token) {
-        return context.json(<Error>{
-          error: "Cannot find API key for proxied service! Either provide it in the request headers or set it as an environment variable."
-        }, 400);
-      }
+  // If the service token is not provided in the request headers, try to get it from the environment variables.
+  // The environment variable name is the service host name in uppercase with all non-alphanumeric characters replaced with "_".
+  const apiKey = `${url.host.replace(/[^a-zA-Z0-9]/g, "_").toUpperCase()}_API_KEY`;
+  const token = xGatewayServiceToken || context.env[apiKey];
 
-      // remove all x-gateway-* headers from the request
-      const filteredHeaders = new HeaderUtils(clone.headers).removeGatewayHeaders().get();
+  if (!token) {
+    return context.json(
+      <Error>{
+        error: "Cannot find API key for proxied service! Either provide it in the request headers or set it as an environment variable.",
+      },
+      400,
+    );
+  }
 
-      // create a new headers object with the filtered headers
-      const headers = new Headers(filteredHeaders);
+  // remove all x-gateway-* headers from the request
+  const filteredHeaders = new HeaderUtils(clone.headers).removeGatewayHeaders().get();
 
-      if (xGatewayServiceAuthKey && xGatewayServiceAuthType === ServiceAuthType.HEADER) {
-        const value = xGatewayServiceAuthKey.toLowerCase() === "authorization" ? `Bearer ${token}` : token;
-        headers.append(xGatewayServiceAuthKey, value);
-      } else if (xGatewayServiceAuthKey && xGatewayServiceAuthType === ServiceAuthType.QUERY) {
-        url.searchParams.append(xGatewayServiceAuthKey, token);
-      }
+  // create a new headers object with the filtered headers
+  const headers = new Headers(filteredHeaders);
 
-      // Make the request to the designated service
-      const response = await fetch(url, {
-        method: clone.method,
-        body: clone.body ? JSON.stringify(await clone.json()) : null,
-        headers: headers,
-      });
+  if (xGatewayServiceAuthKey && xGatewayServiceAuthType === ServiceAuthType.HEADER) {
+    const value = xGatewayServiceAuthKey.toLowerCase() === "authorization" ? `Bearer ${token}` : token;
+    headers.append(xGatewayServiceAuthKey, value);
+  } else if (xGatewayServiceAuthKey && xGatewayServiceAuthType === ServiceAuthType.QUERY) {
+    url.searchParams.append(xGatewayServiceAuthKey, token);
+  }
 
-      // Save analytics params
-      context.executionCtx.waitUntil(new D1(context).saveAnalyticsParams(response));
+  // Make the request to the designated service
+  const response = await fetch(url, {
+    method: clone.method,
+    body: clone.body ? JSON.stringify(await clone.json()) : null,
+    headers: headers,
+  });
 
-      // If the response is not a stream forward it as it is.
-      if (response.headers.get("Content-Type") !== "text/event-stream") {
-        return response;
-      }
-      // If the response is a stream, forward it as a stream.
-      return streamResponse(response.body);
-    });
+  // If the response is not a stream forward it as it is.
+  if (response.headers.get("Content-Type") !== "text/event-stream") {
+    return response;
+  }
+  // If the response is a stream, forward it as a stream.
+  return streamResponse(response.body);
+});
 
 export default app;
