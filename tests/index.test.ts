@@ -18,12 +18,12 @@ describe("Test if the request is proxied to the designated service", () => {
         path: "/v1/chat/completions",
         headers: {
           "content-type": "application/json",
-          "authorization": `Bearer ${BINDINGS["API_OPENAI_COM_API_KEY"]}`,
+          authorization: `Bearer ${BINDINGS["API_OPENAI_COM_API_KEY"]}`,
         },
         body: JSON.stringify({
-          "model": "gpt-3.5-turbo",
-          "messages": [{"role": "user", "content": "Say this is a test!"}],
-          "temperature": 0.7
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: "Say this is a test!" }],
+          temperature: 0.7,
         }),
       })
       .reply(200);
@@ -36,15 +36,15 @@ describe("Test if the request is proxied to the designated service", () => {
         method: "POST",
         path: "/v1/chat/completions",
         query: {
-          "apiKey": BINDINGS["API_OPENAI_COM_API_KEY"],
+          apiKey: BINDINGS["API_OPENAI_COM_API_KEY"],
         },
         headers: {
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          "model": "gpt-3.5-turbo",
-          "messages": [{"role": "user", "content": "Say this is a test!"}],
-          "temperature": 0.7
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: "Say this is a test!" }],
+          temperature: 0.7,
         }),
       })
       .reply(200);
@@ -61,9 +61,9 @@ describe("Test if the request is proxied to the designated service", () => {
           "x-api-key": BINDINGS["API_OPENAI_COM_API_KEY"],
         },
         body: JSON.stringify({
-          "model": "gpt-3.5-turbo",
-          "messages": [{"role": "user", "content": "Say this is a test!"}],
-          "temperature": 0.7
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: "Say this is a test!" }],
+          temperature: 0.7,
         }),
       })
       .reply(200);
@@ -76,13 +76,14 @@ describe("Test if the request is proxied to the designated service", () => {
         method: "GET",
         path: "/shodan/host/1.1.1.1",
         query: {
-          "key": BINDINGS["API_SHODAN_IO_API_KEY"],
+          key: BINDINGS["API_SHODAN_IO_API_KEY"],
         },
       })
       .reply(200);
   });
 
   it("should throw and error if x-gateway-service-host isn't provided in headers.", async () => {
+    const context = new ExecutionContext();
     const response = await app.request(
       "/v1/chat/completions",
       {
@@ -92,19 +93,37 @@ describe("Test if the request is proxied to the designated service", () => {
           "x-gateway-service-auth-type": "HEADER",
           "x-gateway-service-auth-key": "Authorization",
           "content-type": "application/json",
+          "x-gateway-identifier-for-vendor": "x-gateway-service-host-not-found",
         },
         body: JSON.stringify({
-          "model": "gpt-3.5-turbo",
-          "messages": [{"role": "user", "content": "Say this is a test!"}],
-          "temperature": 0.7
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: "Say this is a test!" }],
+          temperature: 0.7,
         }),
       },
       BINDINGS,
-      new ExecutionContext(),
+      context,
     );
+
+    await getMiniflareWaitUntil(context);
 
     expect(response.status).toBe(400);
     expect(await response.json()).toEqual({ error: "x-gateway-service-host header is required." });
+
+    const { DB } = BINDINGS;
+
+    const request: RequestModel = await DB.prepare(
+      `
+        SELECT *
+        FROM requests
+        WHERE identifier_for_vendor = ?1
+    `,
+    )
+      .bind("x-gateway-service-host-not-found")
+      .first();
+
+    expect(request.status_code).toBe(400);
+    expect(JSON.parse(request.error)).toStrictEqual({ error: "x-gateway-service-host header is required." });
   });
 
   it("should use the API key for proxied service from env variables if not provided in request headers.", async () => {
@@ -120,9 +139,9 @@ describe("Test if the request is proxied to the designated service", () => {
           "content-type": "application/json",
         },
         body: JSON.stringify({
-          "model": "gpt-3.5-turbo",
-          "messages": [{"role": "user", "content": "Say this is a test!"}],
-          "temperature": 0.7
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: "Say this is a test!" }],
+          temperature: 0.7,
         }),
       },
       BINDINGS,
@@ -132,11 +151,13 @@ describe("Test if the request is proxied to the designated service", () => {
     expect(response.status).toBe(200);
 
     const { DB } = BINDINGS;
-    const request: RequestModel = await DB.prepare(`
+    const request: RequestModel = await DB.prepare(
+      `
         SELECT *
         FROM requests
         WHERE identifier_for_vendor = ?1
-    `)
+    `,
+    )
       .bind("xxx-yyy-zzz")
       .first();
 
@@ -158,9 +179,9 @@ describe("Test if the request is proxied to the designated service", () => {
           "x-gateway-identifier-for-vendor": "aaa-bbb-ccc",
         },
         body: JSON.stringify({
-          "model": "gpt-3.5-turbo",
-          "messages": [{"role": "user", "content": "Say this is a test!"}],
-          "temperature": 0.7
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: "Say this is a test!" }],
+          temperature: 0.7,
         }),
       },
       BINDINGS,
@@ -169,13 +190,14 @@ describe("Test if the request is proxied to the designated service", () => {
 
     expect(response.status).toBe(200);
 
-
     const { DB } = BINDINGS;
-    const request: RequestModel = await DB.prepare(`
+    const request: RequestModel = await DB.prepare(
+      `
         SELECT *
         FROM requests
         WHERE identifier_for_vendor = ?1
-    `)
+    `,
+    )
       .bind("aaa-bbb-ccc")
       .first();
 
@@ -184,6 +206,7 @@ describe("Test if the request is proxied to the designated service", () => {
   });
 
   it("should throw and error if the API key is not found in header and is not set in env.", async () => {
+    const context = new ExecutionContext();
     const response = await app.request(
       "/v1/chat/completions",
       {
@@ -193,20 +216,40 @@ describe("Test if the request is proxied to the designated service", () => {
           "x-gateway-service-auth-type": "HEADER",
           "x-gateway-service-auth-key": "Authorization",
           "content-type": "application/json",
+          "x-gateway-identifier-for-vendor": "api-key-not-found",
         },
         body: JSON.stringify({
-          "model": "gpt-3.5-turbo",
-          "messages": [{"role": "user", "content": "Say this is a test!"}],
-          "temperature": 0.7
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: "Say this is a test!" }],
+          temperature: 0.7,
         }),
       },
       BINDINGS,
-      new ExecutionContext(),
+      context,
     );
+
+    await getMiniflareWaitUntil(context);
 
     expect(response.status).toBe(400);
     expect(await response.json()).toEqual({
-      error: "Cannot find API key for proxied service! Either provide it in the request headers or set it as an environment variable."
+      error: "Cannot find API key for proxied service! Either provide it in the request headers or set it as an environment variable.",
+    });
+
+    const { DB } = BINDINGS;
+    const request: RequestModel = await DB.prepare(
+      `
+        SELECT *
+        FROM requests
+        WHERE identifier_for_vendor = ?1
+    `,
+    )
+      .bind("api-key-not-found")
+      .first();
+
+    expect(request.status_code).toBe(400);
+    expect(request.identifier_for_vendor).toBe("api-key-not-found");
+    expect(JSON.parse(request.error)).toStrictEqual({
+      error: "Cannot find API key for proxied service! Either provide it in the request headers or set it as an environment variable.",
     });
   });
 
@@ -223,9 +266,9 @@ describe("Test if the request is proxied to the designated service", () => {
           "x-gateway-identifier-for-vendor": "zzz-yyy-xxx",
         },
         body: JSON.stringify({
-          "model": "gpt-3.5-turbo",
-          "messages": [{"role": "user", "content": "Say this is a test!"}],
-          "temperature": 0.7
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: "Say this is a test!" }],
+          temperature: 0.7,
         }),
       },
       BINDINGS,
@@ -235,11 +278,13 @@ describe("Test if the request is proxied to the designated service", () => {
     expect(response.status).toBe(200);
 
     const { DB } = BINDINGS;
-    const request: RequestModel = await DB.prepare(`
+    const request: RequestModel = await DB.prepare(
+      `
         SELECT *
         FROM requests
         WHERE identifier_for_vendor = ?1
-    `)
+    `,
+    )
       .bind("zzz-yyy-xxx")
       .first();
 
@@ -260,9 +305,9 @@ describe("Test if the request is proxied to the designated service", () => {
           "x-gateway-identifier-for-vendor": "ppp-qqq-rrr",
         },
         body: JSON.stringify({
-          "model": "gpt-3.5-turbo",
-          "messages": [{"role": "user", "content": "Say this is a test!"}],
-          "temperature": 0.7
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: "Say this is a test!" }],
+          temperature: 0.7,
         }),
       },
       BINDINGS,
@@ -272,11 +317,13 @@ describe("Test if the request is proxied to the designated service", () => {
     expect(response.status).toBe(200);
 
     const { DB } = BINDINGS;
-    const request: RequestModel = await DB.prepare(`
+    const request: RequestModel = await DB.prepare(
+      `
         SELECT *
         FROM requests
         WHERE identifier_for_vendor = ?1
-    `)
+    `,
+    )
       .bind("ppp-qqq-rrr")
       .first();
 
@@ -304,11 +351,13 @@ describe("Test if the request is proxied to the designated service", () => {
     expect(response.status).toBe(200);
 
     const { DB } = BINDINGS;
-    const request: RequestModel = await DB.prepare(`
+    const request: RequestModel = await DB.prepare(
+      `
         SELECT *
         FROM requests
         WHERE identifier_for_vendor = ?1
-    `)
+    `,
+    )
       .bind("ccc-bbb-aaa")
       .first();
 
@@ -318,23 +367,27 @@ describe("Test if the request is proxied to the designated service", () => {
 
   it("should have all the successful request logged in the database", async () => {
     const { DB } = BINDINGS;
+    const context = new ExecutionContext();
 
     for (let i = 0; i < 10; i++) {
+      const status = i % 2 === 0 ? 200 : 400;
+      const body = i % 2 === 0 ? "Hello World!" : "Bad Request!";
+
       getMockOpenAI()
         .intercept({
           method: "POST",
           path: "/v1/chat/completions",
           headers: {
             "content-type": "application/json",
-            "authorization": `Bearer ${BINDINGS["API_OPENAI_COM_API_KEY"]}`,
+            authorization: `Bearer ${BINDINGS["API_OPENAI_COM_API_KEY"]}`,
           },
           body: JSON.stringify({
-            "model": "gpt-3.5-turbo",
-            "messages": [{"role": "user", "content": `This is a test for ${i}!`}],
-            "temperature": 0.1 * i
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: `This is a test for ${i}!` }],
+            temperature: 0.1 * i,
           }),
         })
-        .reply(200);
+        .reply(status, body);
 
       await app.request(
         "/v1/chat/completions",
@@ -346,26 +399,38 @@ describe("Test if the request is proxied to the designated service", () => {
             "x-gateway-service-auth-type": "HEADER",
             "x-gateway-service-auth-key": "Authorization",
             "content-type": "application/json",
-            "x-gateway-identifier-for-vendor": "aaa-bbb-ccc",
+            "x-gateway-identifier-for-vendor": "logging-successful-requests",
           },
           body: JSON.stringify({
-            "model": "gpt-3.5-turbo",
-            "messages": [{"role": "user", "content": `This is a test for ${i}!`}],
-            "temperature": 0.1 * i
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: `This is a test for ${i}!` }],
+            temperature: 0.1 * i,
           }),
         },
         BINDINGS,
-        new ExecutionContext(),
+        context,
       );
     }
 
-    const count = await DB.prepare(`
-        SELECT count(*) as count
-        FROM requests;
-    `)
-      .first("count");
+    await getMiniflareWaitUntil(context);
 
-    expect(count).toBeGreaterThanOrEqual(10);
+    const { results }: { results: RequestModel[] } = await DB.prepare(
+      `
+        SELECT *
+        FROM requests
+        WHERE identifier_for_vendor = ?1
+    `,
+    )
+      .bind("logging-successful-requests")
+      .all();
+
+    // Test if the requests are logged in the database
+    expect(results.length).toBeGreaterThanOrEqual(10);
+    expect(results.filter((request) => request.status_code === 200).length).toBeGreaterThanOrEqual(5);
+
+    // Test if the error is logged in the database
+    const failed = results.filter((request) => request.status_code === 400);
+    expect(failed.length).toBeGreaterThanOrEqual(5);
+    expect(failed.map((request) => request.error)).toStrictEqual(Array.from({ length: 5 }, () => "Bad Request!"));
   });
-
 });

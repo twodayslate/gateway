@@ -18,7 +18,7 @@ export async function streamResponse(body: ReadableStream<Uint8Array> | null) {
   return new Response(readable, {
     headers: {
       "Content-Type": "application/json",
-      "Transfer-Encoding": "chunked"
-    }
+      "Transfer-Encoding": "chunked",
+    },
   });
 }

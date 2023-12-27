@@ -1,4 +1,3 @@
-
 const config = {
   testEnvironment: "miniflare",
   testMatch: ["**/tests/**/(*.)+(spec|test).+(ts|tsx)"],
