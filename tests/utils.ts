@@ -21,8 +21,18 @@ export function getMockShodan() {
 export async function setInMemoryD1Database() {
   const db = new Database(":memory:");
   const migrations = fs.opendirSync("./migrations");
+  const files = [];
 
   for await (const file of migrations) {
+    files.push(file);
+  }
+
+  // sort files under migrations directory by name
+  files.sort((a, b) => a.name.localeCompare(b.name));
+
+  // run each migration
+  for (const file of files) {
+    console.log(`Running migration: ${file.name}`);
     db.exec(fs.readFileSync(`./migrations/${file.name}`, "utf-8"));
   }
 
