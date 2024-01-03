@@ -204,7 +204,7 @@ describe("Test if the request is proxied to the designated service", () => {
 
     expect(request.identifier_for_vendor).toBe("aaa-bbb-ccc");
     expect(request.status_code).toBe(200);
-    expect(request.cf_bundle_version).toBe("1.0.0");
+    expect(request.bundle_version).toBe("1.0.0");
   });
 
   it("should throw and error if the API key is not found in header and is not set in env.", async () => {
@@ -366,7 +366,7 @@ describe("Test if the request is proxied to the designated service", () => {
 
     expect(request.identifier_for_vendor).toBe("ccc-bbb-aaa");
     expect(request.status_code).toBe(200);
-    expect(request.cf_bundle_version).toBe("2.0.0");
+    expect(request.bundle_version).toBe("2.0.0");
   });
 
   it("should have all the successful request logged in the database", async () => {
