@@ -177,6 +177,7 @@ describe("Test if the request is proxied to the designated service", () => {
           "x-gateway-service-auth-key": "Authorization",
           "content-type": "application/json",
           "x-gateway-identifier-for-vendor": "aaa-bbb-ccc",
+          "x-gateway-bundle-version": "1.0.0",
         },
         body: JSON.stringify({
           model: "gpt-3.5-turbo",
@@ -203,6 +204,7 @@ describe("Test if the request is proxied to the designated service", () => {
 
     expect(request.identifier_for_vendor).toBe("aaa-bbb-ccc");
     expect(request.status_code).toBe(200);
+    expect(request.cf_bundle_version).toBe("1.0.0");
   });
 
   it("should throw and error if the API key is not found in header and is not set in env.", async () => {
@@ -342,6 +344,7 @@ describe("Test if the request is proxied to the designated service", () => {
           "x-gateway-service-auth-key": "key",
           "content-type": "application/json",
           "x-gateway-identifier-for-vendor": "ccc-bbb-aaa",
+          "x-gateway-bundle-version": "2.0.0",
         },
       },
       BINDINGS,
@@ -363,6 +366,7 @@ describe("Test if the request is proxied to the designated service", () => {
 
     expect(request.identifier_for_vendor).toBe("ccc-bbb-aaa");
     expect(request.status_code).toBe(200);
+    expect(request.cf_bundle_version).toBe("2.0.0");
   });
 
   it("should have all the successful request logged in the database", async () => {
