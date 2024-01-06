@@ -18,6 +18,13 @@ export function getMockShodan() {
   return fetchMock.get("http://api.shodan.io");
 }
 
+export function getMockComputeRenderer() {
+  const fetchMock = getMiniflareFetchMock();
+  fetchMock.disableNetConnect();
+
+  return fetchMock.get("http://api.computerender.com");
+}
+
 export async function setInMemoryD1Database() {
   const db = new Database(":memory:");
   const migrations = fs.opendirSync("./migrations");
