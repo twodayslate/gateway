@@ -17,3 +17,25 @@
 ## Errors
 
 If configured incorrectly a HTTP 400 JSON response will be returned. The format will be `{ "error": "<error message>" }`.
+
+## Logging
+
+Metadata is collected for every request. This metadata is used to detect abuse and to help prevent unauthorized access.
+
+All headers are recorded as a JSON blob. Known sensitive headers are stripped from the blob. In addition, the following request header fields are recorded separately:
+
+| Header | Description |
+| ------ | ----------- |
+| `user-agent` | The user agent. |
+| [`cf-connecting-ip`](https://developers.cloudflare.com/fundamentals/reference/http-request-headers/#cf-connecting-ip) | The client IP address connecting to Cloudflare to the origin web server. |
+| [`cf-ipcountry`](https://developers.cloudflare.com/fundamentals/reference/http-request-headers/#cf-ipcountry) | The two-character country code of the originating visitor’s country. |
+| `x-gateway-service-id` | The requested service's identifier. |
+| `x-gateway-service-name` | The requested service's human readable name. | 
+| `x-gateway-identifier-for-vendor` | An alphanumeric string that uniquely identifies a device to the connecting application’s vendor. |
+| `x-gateway-bundle-identifier` | The connecting application's bundle identifier. |
+| `x-gateway-bundle-version` | The connecting applications version number. |
+
+The following is also recorded:
+* Full URL of the request
+* Responses status code 
+* Any server specific errors
