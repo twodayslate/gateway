@@ -18,7 +18,7 @@ app.all("*", async (context) => {
   const xGatewayServiceToken = clone.headers.get("x-gateway-service-token");
   const xGatewayServiceAuthKey = clone.headers.get("x-gateway-service-auth-key");
   const xGatewayServiceAuthType = clone.headers.get("x-gateway-service-auth-type");
-  const xGatewayAuthorizationType = clone.headers.get("x-gateway-authorization-type");
+  const xGatewayAuthorizationType = clone.headers.get("x-gateway-service-authorization-type");
 
   // Create a new URL object from the cloned request URL
   const url = new URL(clone.url);
