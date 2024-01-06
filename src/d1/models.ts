@@ -12,4 +12,5 @@ export interface RequestModel {
   headers: string;
   status_code: number;
   error: string;
+  bundle_version: string;
 }

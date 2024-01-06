@@ -13,6 +13,7 @@ class D1 {
     const xServiceName = this.context.req.raw.headers.get("x-gateway-service-name");
     const xIdentifierForVendor = this.context.req.raw.headers.get("x-gateway-identifier-for-vendor");
     const xBundleIdentifier = this.context.req.raw.headers.get("x-gateway-bundle-identifier");
+    const xBundleVersion = this.context.req.raw.headers.get("x-gateway-bundle-version");
     const url = this.context.req.raw.url;
     const headers = new HeaderUtils(this.context.req.raw.headers).removeSensitiveHeaders().toJsonString();
     const response = this.context.res.clone();
@@ -29,9 +30,10 @@ class D1 {
                               url,
                               headers,
                               status_code,
-                              error
+                              error,
+                              bundle_version
         )
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)
     `,
     )
       .bind(
@@ -46,6 +48,7 @@ class D1 {
         headers,
         response.status,
         response.ok ? null : await response.text(),
+        xBundleVersion,
       )
       .run();
   }
