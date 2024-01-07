@@ -11,8 +11,19 @@
 | ------------- | ------------- |
 | `x-gateway-service-host` | The host for the API request|
 | `x-gateway-service-token` | The API token to use if not in the environment variables|
-| `x-gateway-service-auth-key` | The authorization key for the request. This is used in combined with `x-gateway-service-auth-type`. If `authorization` and `x-gateway-service-auth-type` is `HEADER` then the standard bearer token format will be used.|
+| `x-gateway-service-auth-key` | The authorization key for the request. This is used in combined with `x-gateway-service-auth-type`. If `x-gateway-service-auth-type` is `HEADER` then this value will be used as the HTTP header; if  `x-gateway-service-auth-type` then this value will be the query field. |
 | `x-gateway-service-auth-type` | The authorization type. This is either `HEADER` to add the token to the requests header or `QUERY` to add it to the requests parameters.|
+| `x-gateway-service-auth-prefix` | Any prefix for the token. A space is appeneded after this prefix. |
+
+### Example
+
+If you want to use [Bearer/token authentication](https://swagger.io/docs/specification/authentication/bearer-authentication/) then you will need to set the following headers appropriately:
+
+| Header | Value |
+| ------ | ----- |
+| `x-gateway-service-auth-key` | `Authorization` |
+| `x-gateway-service-auth-type` | `HEADER` |
+| `x-gateway-service-auth-type` | `Bearer` |
 
 ## Errors
 
