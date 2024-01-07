@@ -18,7 +18,7 @@ app.all("*", async (context) => {
   const xGatewayServiceToken = clone.headers.get("x-gateway-service-token");
   const xGatewayServiceAuthKey = clone.headers.get("x-gateway-service-auth-key");
   const xGatewayServiceAuthType = clone.headers.get("x-gateway-service-auth-type");
-  const xGatewayAuthorizationType = clone.headers.get("x-gateway-service-authorization-type");
+  const xGatewayAuthorizationType = clone.headers.get("x-gateway-service-auth-prefix");
 
   // Create a new URL object from the cloned request URL
   const url = new URL(clone.url);
@@ -50,11 +50,11 @@ app.all("*", async (context) => {
   // create a new headers object with the filtered headers
   const headers = new Headers(filteredHeaders);
 
+  const tokenValue = xGatewayAuthorizationType ? `${xGatewayAuthorizationType} ${token}` : token;
   if (xGatewayServiceAuthKey && xGatewayServiceAuthType === ServiceAuthType.HEADER) {
-    const value = xGatewayAuthorizationType ? `${xGatewayAuthorizationType} ${token}` : token;
-    headers.append(xGatewayServiceAuthKey, value);
+    headers.append(xGatewayServiceAuthKey, tokenValue);
   } else if (xGatewayServiceAuthKey && xGatewayServiceAuthType === ServiceAuthType.QUERY) {
-    url.searchParams.append(xGatewayServiceAuthKey, token);
+    url.searchParams.append(xGatewayServiceAuthKey, tokenValue);
   }
 
   // Make the request to the designated service
