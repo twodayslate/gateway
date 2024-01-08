@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Context, Hono } from "hono";
 import { Error, ServiceAuthType } from "./types";
 import { streamResponse } from "./utils";
 import { Bindings } from "./bindings";
@@ -9,7 +9,7 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 app.use("*", analytics());
 
-app.all("*", async (context) => {
+app.all("*", async (context: Context<{Bindings: Bindings}>) => {
   // Clone the request
   const clone = context.req.raw.clone();
 
@@ -60,7 +60,7 @@ app.all("*", async (context) => {
   // Make the request to the designated service
   const response = await fetch(url, {
     method: clone.method,
-    body: clone.body ? JSON.stringify(await clone.json()) : null,
+    body: clone.body,
     headers: headers,
   });
 
