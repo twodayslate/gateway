@@ -23,7 +23,7 @@ If you want to use [Bearer/token authentication](https://swagger.io/docs/specifi
 | ------ | ----- |
 | `x-gateway-service-auth-key` | `Authorization` |
 | `x-gateway-service-auth-type` | `HEADER` |
-| `x-gateway-service-auth-type` | `Bearer` |
+| `x-gateway-service-auth-prefix` | `Bearer` |
 
 ## Errors
 
