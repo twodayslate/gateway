@@ -1,5 +1,5 @@
 import app from "../src";
-import { BINDINGS, getMockOpenAI, getMockShodan, setInMemoryD1Database } from "./utils";
+import { BINDINGS, getMockComputeRenderer, getMockOpenAI, getMockShodan, setInMemoryD1Database } from "./utils";
 import { RequestModel } from "../src/d1/models";
 
 describe("Test if the request is proxied to the designated service", () => {
@@ -8,6 +8,7 @@ describe("Test if the request is proxied to the designated service", () => {
     BINDINGS["DB"] = await setInMemoryD1Database();
     BINDINGS["API_OPENAI_COM_API_KEY"] = "sk-1234567890";
     BINDINGS["API_SHODAN_IO_API_KEY"] = "shodan-api-key";
+    BINDINGS["API_COMPUTERENDER_COM_API_KEY"] = "compute-render-api-key";
   });
 
   // Intercept the request to the proxied service when the API key is provided in the request headers
@@ -82,6 +83,23 @@ describe("Test if the request is proxied to the designated service", () => {
       .reply(200);
   });
 
+  // Intercept the request to be proxied to api.computerender.com
+  beforeEach(() => {
+    getMockComputeRenderer()
+      .intercept({
+        method: "POST",
+        path: "/generate",
+        headers: {
+          "content-type": "application/json",
+          authorization: `X-API-Key ${BINDINGS["API_COMPUTERENDER_COM_API_KEY"]}`,
+        },
+        body: JSON.stringify({
+          prompt: "This is a test!",
+        }),
+      })
+      .reply(200);
+  });
+
   it("should throw and error if x-gateway-service-host isn't provided in headers.", async () => {
     const context = new ExecutionContext();
     const response = await app.request(
@@ -135,6 +153,7 @@ describe("Test if the request is proxied to the designated service", () => {
           "x-gateway-service-host": "api.openai.com",
           "x-gateway-service-auth-type": "HEADER",
           "x-gateway-service-auth-key": "Authorization",
+          "x-gateway-service-auth-prefix": "Bearer",
           "x-gateway-identifier-for-vendor": "xxx-yyy-zzz",
           "content-type": "application/json",
         },
@@ -175,6 +194,7 @@ describe("Test if the request is proxied to the designated service", () => {
           "x-gateway-service-token": BINDINGS["API_OPENAI_COM_API_KEY"],
           "x-gateway-service-auth-type": "HEADER",
           "x-gateway-service-auth-key": "Authorization",
+          "x-gateway-service-auth-prefix": "Bearer",
           "content-type": "application/json",
           "x-gateway-identifier-for-vendor": "aaa-bbb-ccc",
           "x-gateway-bundle-version": "1.0.0",
@@ -369,6 +389,46 @@ describe("Test if the request is proxied to the designated service", () => {
     expect(request.bundle_version).toBe("2.0.0");
   });
 
+  it("should prepend the authorization type value for authorization header", async () => {
+    const context = new ExecutionContext();
+    const response = await app.request(
+      "/generate",
+      {
+        method: "POST",
+        headers: {
+          "x-gateway-service-host": "api.computerender.com",
+          "x-gateway-service-auth-type": "HEADER",
+          "x-gateway-service-auth-key": "authorization",
+          "x-gateway-service-auth-prefix": "X-API-Key",
+          "content-type": "application/json",
+          "x-gateway-identifier-for-vendor": "compute_renderer",
+        },
+        body: JSON.stringify({
+          prompt: "This is a test!",
+        }),
+      },
+      BINDINGS,
+      context,
+    );
+
+    await getMiniflareWaitUntil(context);
+
+    expect(response.status).toBe(200);
+
+    const { DB } = BINDINGS;
+    const { results }: { results: RequestModel[] } = await DB.prepare(
+      `
+        SELECT *
+        FROM requests
+        WHERE identifier_for_vendor = ?1
+    `,
+    )
+      .bind("compute_renderer")
+      .all();
+
+    expect(results.length).toBe(1);
+  });
+
   it("should have all the successful request logged in the database", async () => {
     const { DB } = BINDINGS;
     const context = new ExecutionContext();
@@ -402,6 +462,7 @@ describe("Test if the request is proxied to the designated service", () => {
             "x-gateway-service-token": BINDINGS["API_OPENAI_COM_API_KEY"],
             "x-gateway-service-auth-type": "HEADER",
             "x-gateway-service-auth-key": "Authorization",
+            "x-gateway-service-auth-prefix": "Bearer",
             "content-type": "application/json",
             "x-gateway-identifier-for-vendor": "logging-successful-requests",
           },
