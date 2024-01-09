@@ -21,11 +21,7 @@ describe("Test if the request is proxied to the designated service", () => {
           "content-type": "application/json",
           authorization: `Bearer ${BINDINGS["API_OPENAI_COM_API_KEY"]}`,
         },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: "Say this is a test!" }],
-          temperature: 0.7,
-        }),
+        body: undefined,
       })
       .reply(200);
   });
@@ -42,11 +38,7 @@ describe("Test if the request is proxied to the designated service", () => {
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: "Say this is a test!" }],
-          temperature: 0.7,
-        }),
+        body: undefined,
       })
       .reply(200);
   });
@@ -61,11 +53,7 @@ describe("Test if the request is proxied to the designated service", () => {
           "content-type": "application/json",
           "x-api-key": BINDINGS["API_OPENAI_COM_API_KEY"],
         },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: "Say this is a test!" }],
-          temperature: 0.7,
-        }),
+        body: undefined,
       })
       .reply(200);
   });
@@ -90,12 +78,10 @@ describe("Test if the request is proxied to the designated service", () => {
         method: "POST",
         path: "/generate",
         headers: {
-          "content-type": "application/json",
+          "content-type": "multipart/form-data; boundary=1234",
           authorization: `X-API-Key ${BINDINGS["API_COMPUTERENDER_COM_API_KEY"]}`,
         },
-        body: JSON.stringify({
-          prompt: "This is a test!",
-        }),
+        body: undefined,
       })
       .reply(200);
   });
@@ -400,12 +386,10 @@ describe("Test if the request is proxied to the designated service", () => {
           "x-gateway-service-auth-type": "HEADER",
           "x-gateway-service-auth-key": "authorization",
           "x-gateway-service-auth-prefix": "X-API-Key",
-          "content-type": "application/json",
+          "content-type": "multipart/form-data; boundary=1234",
           "x-gateway-identifier-for-vendor": "compute_renderer",
         },
-        body: JSON.stringify({
-          prompt: "This is a test!",
-        }),
+        body: "This is a test!",
       },
       BINDINGS,
       context,
@@ -440,21 +424,17 @@ describe("Test if the request is proxied to the designated service", () => {
       getMockOpenAI()
         .intercept({
           method: "POST",
-          path: "/v1/chat/completions",
+          path: `/v1/chat/completions?temperature=${0.1 * i}`,
           headers: {
             "content-type": "application/json",
             authorization: `Bearer ${BINDINGS["API_OPENAI_COM_API_KEY"]}`,
           },
-          body: JSON.stringify({
-            model: "gpt-3.5-turbo",
-            messages: [{ role: "user", content: `This is a test for ${i}!` }],
-            temperature: 0.1 * i,
-          }),
+          body: undefined,
         })
         .reply(status, body);
 
       await app.request(
-        "/v1/chat/completions",
+        `/v1/chat/completions?temperature=${0.1 * i}`,
         {
           method: "POST",
           headers: {
