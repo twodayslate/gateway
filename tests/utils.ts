@@ -25,6 +25,13 @@ export function getMockComputeRenderer() {
   return fetchMock.get("http://api.computerender.com");
 }
 
+export function getMockDomainAvailabilityWhoIsXmlApi() {
+  const fetchMock = getMiniflareFetchMock();
+  fetchMock.disableNetConnect();
+
+  return fetchMock.get("http://domain-availability.whoisxmlapi.com");
+}
+
 export async function setInMemoryD1Database() {
   const db = new Database(":memory:");
   const migrations = fs.opendirSync("./migrations");
