@@ -78,7 +78,7 @@ describe("Test if the request is proxied to the designated service", () => {
         method: "POST",
         path: "/generate",
         headers: {
-          "content-type": "application/json",
+          "content-type": "multipart/form-data; boundary=1234",
           authorization: `X-API-Key ${BINDINGS["API_COMPUTERENDER_COM_API_KEY"]}`,
         },
         body: undefined,
@@ -386,12 +386,10 @@ describe("Test if the request is proxied to the designated service", () => {
           "x-gateway-service-auth-type": "HEADER",
           "x-gateway-service-auth-key": "authorization",
           "x-gateway-service-auth-prefix": "X-API-Key",
-          "content-type": "application/json",
+          "content-type": "multipart/form-data; boundary=1234",
           "x-gateway-identifier-for-vendor": "compute_renderer",
         },
-        body: JSON.stringify({
-          prompt: "This is a test!",
-        }),
+        body: "This is a test!",
       },
       BINDINGS,
       context,
