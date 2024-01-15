@@ -1,5 +1,5 @@
 import { BINDINGS, getMockOpenAI, setInMemoryD1Database } from "./utils";
-import app from "../src";
+import { app } from "../src";
 import { RequestModel } from "../src/d1/models";
 
 

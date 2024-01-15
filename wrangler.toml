@@ -4,6 +4,9 @@ compatibility_date = "2023-10-30"
 
 ############################# LOCAL #################################
 
+[triggers]
+crons = ["0 0 */7 * *"] # At 12:00 AM, every 7 days
+
 [[d1_databases]]
 binding = "DB"
 database_name = "gateway_local"
@@ -11,10 +14,16 @@ database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 migrations_table = "migrations"
 migrations_dir = "migrations"
 
+[vars]
+DELETE_OLD_DATA_BEFORE = "-5 minutes" # Standard SQL format
+
 ############################# PRODUCTION #############################
 
 [env.production]
 name = "gateway"
+
+[env.production.triggers]
+crons = ["0 0 */7 * *"] # At 12:00 AM, every 7 days
 
 [[env.production.d1_databases]]
 binding = "DB"
@@ -22,3 +31,6 @@ database_name = "gateway"
 database_id = "bea25784-0c7b-46d3-a064-47b6ccafa92e"
 migrations_table = "migrations"
 migrations_dir = "migrations"
+
+[env.production.vars]
+DELETE_OLD_DATA_BEFORE = "-3 months" # Standard SQL format

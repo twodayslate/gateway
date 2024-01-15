@@ -5,6 +5,7 @@
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
+    "dev:scheduled": "wrangler dev --test-scheduled",
     "start": "wrangler dev",
     "lint": "eslint --ext .js,.ts,.tsx ./src --fix",
     "test": "jest"
