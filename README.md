@@ -41,12 +41,31 @@ All headers are recorded as a JSON blob. Known sensitive headers are stripped fr
 | [`cf-connecting-ip`](https://developers.cloudflare.com/fundamentals/reference/http-request-headers/#cf-connecting-ip) | The client IP address connecting to Cloudflare to the origin web server. |
 | [`cf-ipcountry`](https://developers.cloudflare.com/fundamentals/reference/http-request-headers/#cf-ipcountry) | The two-character country code of the originating visitor’s country. |
 | `x-gateway-service-id` | The requested service's identifier. |
-| `x-gateway-service-name` | The requested service's human readable name. | 
+| `x-gateway-service-name` | The requested service's human readable name. |
 | `x-gateway-identifier-for-vendor` | An alphanumeric string that uniquely identifies a device to the connecting application’s vendor. |
 | `x-gateway-bundle-identifier` | The connecting application's bundle identifier. |
 | `x-gateway-bundle-version` | The connecting applications version number. |
 
 The following is also recorded:
 * Full URL of the request
-* Responses status code 
+* Responses status code
 * Any server specific errors
+
+## Data Retention
+
+All metadata is kept for a period of 90 days. Beyond this timeframe, the metadata undergoes permanent deletion with **no backup procedures in place.**
+
+To achieve this, a cron job executes every 7 days, targeting metadata older than 90 days for deletion. The configuration for this cron job is stored in the [`wrangler.toml`](./wrangler.toml) file, specifically under the `triggers` section.
+
+The cron job is designed to respect the `DELETE_OLD_DATA_BEFORE` environment variable. If this variable is not set, the cron job will intentionally **generate an SQL error**, preventing the deletion of any data.
+
+#### DELETE_OLD_DATA_BEFORE variable Format
+
+```
+[sign] quantity unit
+```
+
+- `sign`: Optional. Use `+` for addition and `-` for subtraction.
+- `quantity`: Numeric value.
+- `unit`: Time unit (`year(s)`, `month(s)`, `day(s)`, `hour(s)`, `minute(s)`, `second(s)`).
+
