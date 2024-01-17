@@ -5,7 +5,7 @@ compatibility_date = "2023-10-30"
 ############################# LOCAL #################################
 
 [triggers]
-crons = ["0 0 */7 * *"] # At 12:00 AM, every 7 days
+crons = ["0 0 * * SUN"] # At 12:00 AM, every sunday
 
 [[d1_databases]]
 binding = "DB"
@@ -16,6 +16,7 @@ migrations_dir = "migrations"
 
 [vars]
 DELETE_OLD_DATA_BEFORE = "-5 minutes" # Standard SQL format
+DELETE_OLD_DATA_CRON = "0 0 * * SUN" # check crons under triggers section
 
 ############################# PRODUCTION #############################
 
@@ -23,7 +24,7 @@ DELETE_OLD_DATA_BEFORE = "-5 minutes" # Standard SQL format
 name = "gateway"
 
 [env.production.triggers]
-crons = ["0 0 */7 * *"] # At 12:00 AM, every 7 days
+crons = ["0 0 * * SUN"] # At 12:00 AM, every sunday
 
 [[env.production.d1_databases]]
 binding = "DB"
@@ -34,3 +35,4 @@ migrations_dir = "migrations"
 
 [env.production.vars]
 DELETE_OLD_DATA_BEFORE = "-3 months" # Standard SQL format
+DELETE_OLD_DATA_CRON = "0 0 * * SUN" # check crons under env.production.triggers section

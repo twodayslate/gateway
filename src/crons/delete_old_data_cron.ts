@@ -14,7 +14,7 @@ async function delete_old_data_cron(env: Bindings) {
     throw `Delete old data cron failed: ${response.error}`;
   }
 
-  console.info(`Delete old data cron completed successfully.\nMetadata: ${response.meta}`);
+  console.info(`Delete old data cron completed successfully.\nMetadata: ${JSON.stringify(response.meta)}`);
   return response.meta;
 }
 

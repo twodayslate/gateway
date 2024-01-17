@@ -3,4 +3,5 @@ export type Bindings = {
 } & {
   DB: D1Database,
   DELETE_OLD_DATA_BEFORE: string
+  DELETE_OLD_DATA_CRON: string
 };

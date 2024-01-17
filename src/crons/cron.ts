@@ -4,7 +4,7 @@ import delete_old_data_cron from "./delete_old_data_cron";
 
 async function cron(event: ScheduledEvent, env: Bindings, context: ExecutionContext) {
   switch (event.cron) {
-    case "0 0 */7 * *":
+    case env.DELETE_OLD_DATA_CRON:
       await delete_old_data_cron(env);
       break;
     default:

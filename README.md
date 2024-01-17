@@ -53,9 +53,9 @@ The following is also recorded:
 
 ## Data Retention
 
-All metadata is kept for a period of 90 days. Beyond this timeframe, the metadata undergoes permanent deletion with **no backup procedures in place.**
+All metadata is kept for a configured amount of period. Beyond this timeframe, the metadata undergoes permanent deletion with **no backup procedures in place.**
 
-To achieve this, a cron job executes every 7 days, targeting metadata older than 90 days for deletion. The configuration for this cron job is stored in the [`wrangler.toml`](./wrangler.toml) file, specifically under the `triggers` section.
+To achieve this, a cron job executes every Sunday 12:00 AM(configurable), targeting metadata older than configured period for deletion. The configuration for this cron job is stored in the [`wrangler.toml`](./wrangler.toml) file, specifically under the `triggers` section.
 
 The cron job is designed to respect the `DELETE_OLD_DATA_BEFORE` environment variable. If this variable is not set, the cron job will intentionally **generate an SQL error**, preventing the deletion of any data.
 
