@@ -4,8 +4,9 @@ import { streamResponse } from "./utils";
 import { Bindings } from "./bindings";
 import HeaderUtils from "./header_utils";
 import analytics from "./middleware/analytics";
+import cron from "./crons/cron";
 
-const app = new Hono<{ Bindings: Bindings }>();
+export const app = new Hono<{ Bindings: Bindings }>();
 
 app.use("*", analytics());
 
@@ -72,4 +73,7 @@ app.all("*", async (context: Context<{Bindings: Bindings}>) => {
   return streamResponse(response.body);
 });
 
-export default app;
+export default {
+  fetch: app.fetch,
+  scheduled: cron,
+};
