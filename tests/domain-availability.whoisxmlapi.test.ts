@@ -33,6 +33,7 @@ describe("it should test all the proxied endpoints for domain-availability.whois
           "x-gateway-service-auth-key": "apiKey",
           "content-type": "application/json",
           "x-gateway-identifier-for-vendor": "zzz-yyy-xxx",
+          "x-gateway-service-type": "DIRECT",
         },
       },
       BINDINGS,
@@ -55,5 +56,4 @@ describe("it should test all the proxied endpoints for domain-availability.whois
     expect(request.identifier_for_vendor).toBe("zzz-yyy-xxx");
     expect(request.status_code).toBe(200);
   });
-
 });

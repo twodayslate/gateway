@@ -2,7 +2,6 @@ import { BINDINGS, getMockOpenAI, setInMemoryD1Database } from "./utils";
 import { app } from "../src";
 import { RequestModel } from "../src/d1/models";
 
-
 describe("it should have all the request logged to the requests table", () => {
   // This is a hack to make sure that the database is initialized before the tests are run
   beforeAll(async () => {
@@ -41,6 +40,7 @@ describe("it should have all the request logged to the requests table", () => {
             "x-gateway-service-auth-prefix": "Bearer",
             "content-type": "application/json",
             "x-gateway-identifier-for-vendor": "logging-successful-requests",
+            "x-gateway-service-type": "DIRECT",
           },
           body: JSON.stringify({
             model: "gpt-3.5-turbo",

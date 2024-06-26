@@ -22,9 +22,9 @@ describe("it should test all the proxied endpoints for compute renderer", () => 
           "content-type": "application/x-www-form-urlencoded",
           authorization: `X-API-Key ${BINDINGS["API_COMPUTERENDER_COM_API_KEY"]}`,
         },
-        body: () => true
+        body: () => true,
       })
-      .reply<never>(200, null, {
+      .reply<never>(200, undefined, {
         headers: {
           "x-compute-renderer": "true",
         },
@@ -47,6 +47,7 @@ describe("it should test all the proxied endpoints for compute renderer", () => 
           "x-gateway-service-auth-prefix": "X-API-Key",
           "content-type": "application/x-www-form-urlencoded",
           "x-gateway-identifier-for-vendor": "compute_renderer",
+          "x-gateway-service-type": "DIRECT",
         },
         body: formData,
       },

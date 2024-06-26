@@ -34,6 +34,7 @@ describe("it should test all the proxied endpoints for shodan", () => {
           "content-type": "application/json",
           "x-gateway-identifier-for-vendor": "ccc-bbb-aaa",
           "x-gateway-bundle-version": "2.0.0",
+          "x-gateway-service-type": "DIRECT",
         },
       },
       BINDINGS,

@@ -38,6 +38,7 @@ describe("Test if a request has all the details required to proxy the request to
           "x-gateway-service-auth-key": "Authorization",
           "content-type": "application/json",
           "x-gateway-identifier-for-vendor": "x-gateway-service-host-not-found",
+          "x-gateway-service-type": "DIRECT",
         },
         body: JSON.stringify({
           model: "gpt-3.5-turbo",
@@ -82,6 +83,7 @@ describe("Test if a request has all the details required to proxy the request to
           "x-gateway-service-auth-key": "Authorization",
           "content-type": "application/json",
           "x-gateway-identifier-for-vendor": "api-key-not-found",
+          "x-gateway-service-type": "DIRECT",
         },
         body: JSON.stringify({
           model: "gpt-3.5-turbo",
@@ -117,5 +119,4 @@ describe("Test if a request has all the details required to proxy the request to
       error: "Cannot find API key for proxied service! Either provide it in the request headers or set it as an environment variable.",
     });
   });
-
 });

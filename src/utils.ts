@@ -22,3 +22,14 @@ export async function streamResponse(body: ReadableStream<Uint8Array> | null) {
     },
   });
 }
+
+/**
+ * A function to convert a string to an environment variable key.
+ *
+ * @param str - The string to convert to an environment variable key.
+ *
+ * @returns The environment variable key.
+ */
+export function toEnvKey(str: string) {
+  return `${str.replace(/[^a-zA-Z0-9]/g, "_").toUpperCase()}_API_KEY`;
+}

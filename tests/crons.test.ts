@@ -65,5 +65,4 @@ describe("Test all the cron jobs", () => {
 
     expect(meta.changes).toBe(0);
   });
-
 });
