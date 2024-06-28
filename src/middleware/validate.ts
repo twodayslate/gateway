@@ -7,7 +7,7 @@ function validate(): MiddlewareHandler {
   return async (context: AppContext, next) => {
     const headers = context.req.raw.headers;
     const xGatewayServiceHost = headers.get("x-gateway-service-host");
-    const xGatewayServiceType = headers.get("x-gateway-service-type") as ServiceType || "DIRECT";
+    const xGatewayServiceType = (headers.get("x-gateway-service-type") as ServiceType) || "DIRECT";
     const xGatewayServiceProxy = headers.get("x-gateway-service-proxy");
     const xGatewayServiceToken = headers.get("x-gateway-service-token");
 
@@ -25,7 +25,7 @@ function validate(): MiddlewareHandler {
 
     // If the service token is not provided in the request headers, try to get it from the environment variables.
     // The environment variable name is the service host name in uppercase with all non-alphanumeric characters replaced with "_".
-    const apiKey = xGatewayServiceProxy ? toEnvKey(`${xGatewayServiceHost}_${xGatewayServiceProxy}`) : toEnvKey(xGatewayServiceHost);
+    const apiKey = toEnvKey(xGatewayServiceHost, xGatewayServiceProxy);
     const token = xGatewayServiceToken || context.env[apiKey];
 
     if (!token) {

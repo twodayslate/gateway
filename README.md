@@ -28,7 +28,7 @@
 | `x-gateway-service-auth-prefix` | `Bearer` |
 
 * If you want to use a gateway service where the host remains constant but different API keys are used depending on the specific service within the gateway, follow these steps.
-For example, if you're using the Cloudflare AI gateway with the OpenAI service, and you have the Cloudflare secret for this service set as `GATEWAY_AI_CLOUDFLARE_COM_OPEN_AI_API_KEY = sk-your-api-key`, then make a request with the following headers:
+For example, if you're using the Cloudflare AI gateway with the OpenAI service, and you have the Cloudflare secret for this service set as `GATEWAY_AI_CLOUDFLARE_COM_API_KEY_OPEN_AI = sk-your-api-key`, then make a request with the following headers:
 
 | Header                          | Value                       |
 |---------------------------------|-----------------------------|

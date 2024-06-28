@@ -24,12 +24,27 @@ export async function streamResponse(body: ReadableStream<Uint8Array> | null) {
 }
 
 /**
+ * check if the value is not null or undefined in typesafe way.
+ * @param value - The value to check
+ * @returns the value.
+ */
+function isNotNullOrUndefined<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
+}
+
+/**
  * A function to convert a string to an environment variable key.
  *
  * @param str - The string to convert to an environment variable key.
+ * @param suffix - The suffixes to add
  *
  * @returns The environment variable key.
  */
-export function toEnvKey(str: string) {
-  return `${str.replace(/[^a-zA-Z0-9]/g, "_").toUpperCase()}_API_KEY`;
+export function toEnvKey(str: string, ...suffix: (string | null | undefined)[]) {
+  const s = `${str.replace(/[^a-zA-Z0-9]/g, "_")}_API_KEY`;
+
+  return suffix
+    .filter(isNotNullOrUndefined)
+    .reduce((a, c) => a + `_${c}`, s)
+    .toUpperCase();
 }
