@@ -28,7 +28,7 @@
 | `x-gateway-service-auth-prefix` | `Bearer` |
 
 * If you want to use a gateway service where the host remains constant but different API keys are used depending on the specific service within the gateway, follow these steps.
-For example, if you're using the Cloudflare AI gateway with the OpenAI service, and you have the Cloudflare secret for this service set as `CLOUDFLARE_AI_OPEN_AI_API_KEY = sk-your-api-key`, then make a request with the following headers:
+For example, if you're using the Cloudflare AI gateway with the OpenAI service, and you have the Cloudflare secret for this service set as `GATEWAY_AI_CLOUDFLARE_COM_OPEN_AI_API_KEY = sk-your-api-key`, then make a request with the following headers:
 
 | Header                          | Value                       |
 |---------------------------------|-----------------------------|
@@ -37,7 +37,7 @@ For example, if you're using the Cloudflare AI gateway with the OpenAI service, 
 | `x-gateway-service-auth-prefix` | `Bearer`                    |
 | `x-gateway-service-type`        | `GATEWAY`                   |
 | `x-gateway-service-host`        | `gateway.ai.cloudflare.com` |
-| `x-gateway-service-proxy`       | `CLOUDFLARE AI;OPEN AI`     |
+| `x-gateway-service-proxy`       | `OPEN AI`                   |
 
 ```http request
 POST https://gateway.your-subdomain.workers.dev/v1/{account_id}/{gateway_id}/openai/chat/completions
@@ -45,7 +45,7 @@ x-gateway-service-auth-key: Authorization
 x-gateway-service-auth-type: HEADER
 x-gateway-service-auth-prefix: Bearer
 x-gateway-service-type: GATEWAY
-x-gateway-service-proxy: CLOUDFLARE AI;OPEN AI
+x-gateway-service-proxy: OPEN AI
 x-gateway-service-host: gateway.ai.cloudflare.com
 Content-Type: application/json
 

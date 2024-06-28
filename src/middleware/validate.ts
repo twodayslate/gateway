@@ -29,7 +29,7 @@ function validate(): MiddlewareHandler {
 
     // If the service token is not provided in the request headers, try to get it from the environment variables.
     // The environment variable name is the service host name in uppercase with all non-alphanumeric characters replaced with "_".
-    const apiKey = xGatewayServiceProxy ? toEnvKey(xGatewayServiceProxy) : toEnvKey(xGatewayServiceHost);
+    const apiKey = xGatewayServiceProxy ? toEnvKey(`${xGatewayServiceHost}_${xGatewayServiceProxy}`) : toEnvKey(xGatewayServiceHost);
     const token = xGatewayServiceToken || context.env[apiKey];
 
     if (!token) {

@@ -5,7 +5,7 @@ import { BINDINGS, getMockCloudflareAIGateway, setInMemoryD1Database } from "./u
 describe("Cloudflare AI Gateway", () => {
   beforeAll(async () => {
     BINDINGS["DB"] = await setInMemoryD1Database();
-    BINDINGS["CLOUDFLARE_AI_MISTRAL_API_KEY"] = "cloudflare-ai-mistral";
+    BINDINGS["GATEWAY_AI_CLOUDFLARE_COM_MISTRAL_API_KEY"] = "cloudflare-ai-mistral";
   });
 
   beforeEach(() => {
@@ -34,7 +34,7 @@ describe("Cloudflare AI Gateway", () => {
           "x-gateway-service-auth-prefix": "Bearer",
           "x-gateway-identifier-for-vendor": "ccc-ddd-eee",
           "x-gateway-service-type": "DIRECT",
-          "x-gateway-service-proxy": "CLOUDFLARE AI;MISTRAL",
+          "x-gateway-service-proxy": "MISTRAL",
           "content-type": "application/json",
         },
         body: JSON.stringify({
@@ -95,7 +95,7 @@ describe("Cloudflare AI Gateway", () => {
           "x-gateway-service-auth-prefix": "Bearer",
           "x-gateway-identifier-for-vendor": "ccc-ddd-eee",
           "x-gateway-service-type": "GATEWAY",
-          "x-gateway-service-proxy": "CLOUDFLARE AI;MISTRAL",
+          "x-gateway-service-proxy": "MISTRAL",
           "content-type": "application/json",
         },
         body: JSON.stringify({
