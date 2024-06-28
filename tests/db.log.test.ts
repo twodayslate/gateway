@@ -40,7 +40,6 @@ describe("it should have all the request logged to the requests table", () => {
             "x-gateway-service-auth-prefix": "Bearer",
             "content-type": "application/json",
             "x-gateway-identifier-for-vendor": "logging-successful-requests",
-            "x-gateway-service-type": "DIRECT",
           },
           body: JSON.stringify({
             model: "gpt-3.5-turbo",

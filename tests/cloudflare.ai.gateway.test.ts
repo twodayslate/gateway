@@ -33,7 +33,6 @@ describe("Cloudflare AI Gateway", () => {
           "x-gateway-service-auth-key": "Authorization",
           "x-gateway-service-auth-prefix": "Bearer",
           "x-gateway-identifier-for-vendor": "ccc-ddd-eee",
-          "x-gateway-service-type": "DIRECT",
           "x-gateway-service-proxy": "MISTRAL",
           "content-type": "application/json",
         },

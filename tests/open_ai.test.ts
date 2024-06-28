@@ -36,7 +36,6 @@ describe("it should test all the proxied endpoints for openai", () => {
           "x-gateway-service-auth-prefix": "Bearer",
           "x-gateway-identifier-for-vendor": "xxx-yyy-zzz",
           "content-type": "application/json",
-          "x-gateway-service-type": "DIRECT",
         },
         body: JSON.stringify({
           model: "gpt-3.5-turbo",
@@ -79,7 +78,6 @@ describe("it should test all the proxied endpoints for openai", () => {
           "content-type": "application/json",
           "x-gateway-identifier-for-vendor": "aaa-bbb-ccc",
           "x-gateway-bundle-version": "1.0.0",
-          "x-gateway-service-type": "DIRECT",
         },
         body: JSON.stringify({
           model: "gpt-3.5-turbo",

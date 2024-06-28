@@ -47,7 +47,6 @@ describe("it should test all the proxied endpoints for compute renderer", () => 
           "x-gateway-service-auth-prefix": "X-API-Key",
           "content-type": "application/x-www-form-urlencoded",
           "x-gateway-identifier-for-vendor": "compute_renderer",
-          "x-gateway-service-type": "DIRECT",
         },
         body: formData,
       },

@@ -7,16 +7,12 @@ function validate(): MiddlewareHandler {
   return async (context: AppContext, next) => {
     const headers = context.req.raw.headers;
     const xGatewayServiceHost = headers.get("x-gateway-service-host");
-    const xGatewayServiceType = headers.get("x-gateway-service-type") as ServiceType;
+    const xGatewayServiceType = headers.get("x-gateway-service-type") as ServiceType || "DIRECT";
     const xGatewayServiceProxy = headers.get("x-gateway-service-proxy");
     const xGatewayServiceToken = headers.get("x-gateway-service-token");
 
     if (!xGatewayServiceHost) {
       return context.json(<Error>{ error: "x-gateway-service-host header is required." }, 400);
-    }
-
-    if (!xGatewayServiceType) {
-      return context.json(<Error>{ error: "x-gateway-service-type header is required." }, 400);
     }
 
     if (xGatewayServiceType === "DIRECT" && xGatewayServiceProxy) {
