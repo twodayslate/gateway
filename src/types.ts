@@ -17,8 +17,8 @@ export type D1ResultMeta = {
 };
 
 export class ServiceType {
-  static DIRECT: "DIRECT" = "DIRECT";
-  static GATEWAY: "GATEWAY" = "GATEWAY";
+  static readonly DIRECT = "DIRECT";
+  static readonly GATEWAY = "GATEWAY";
 
   static parse(value: string | null): TServiceType {
     if (value === null) {

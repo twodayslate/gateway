@@ -7,7 +7,7 @@ function validate(): MiddlewareHandler {
   return async (context: AppContext, next) => {
     const headers = context.req.raw.headers;
     const xGatewayServiceHost = headers.get("x-gateway-service-host");
-    const xGatewayServiceType = ServiceType.parse(headers.get("x-gateway-service-type"))
+    const xGatewayServiceType = ServiceType.parse(headers.get("x-gateway-service-type"));
     const xGatewayServiceProxy = headers.get("x-gateway-service-proxy");
     const xGatewayServiceToken = headers.get("x-gateway-service-token");
 
