@@ -1,4 +1,4 @@
-import { Error } from "./types";
+import { TError } from "./types";
 
 /**
  * A function to stream response
@@ -9,7 +9,7 @@ import { Error } from "./types";
  */
 export async function streamResponse(body: ReadableStream<Uint8Array> | null) {
   if (!body) {
-    return Response.json(<Error>{ error: "No body to stream!" }, { status: 500 });
+    return Response.json(<TError>{ error: "No body to stream!" }, { status: 500 });
   }
 
   const { readable, writable } = new TransformStream();
@@ -28,7 +28,7 @@ export async function streamResponse(body: ReadableStream<Uint8Array> | null) {
  * @param value - The value to check
  * @returns the value.
  */
-function isNotNullOrUndefined<T>(value: T | null | undefined): value is T {
+export function isNotNullOrUndefined<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined;
 }
 

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { Error, ServiceAuthType } from "./types";
+import { TError, ServiceAuthType } from "./types";
 import { streamResponse } from "./utils";
 import { AppContext, Bindings, Variables } from "./bindings";
 import HeaderUtils from "./header_utils";
@@ -31,7 +31,7 @@ app.all("*", async (context: AppContext) => {
   const tokenValue = xGatewayAuthorizationPrefix ? `${xGatewayAuthorizationPrefix} ${token}` : token;
 
   if (!xGatewayServiceAuthKey) {
-    return context.json(<Error>{ error: "x-gateway-service-auth-key is required!" });
+    return context.json(<TError>{ error: "x-gateway-service-auth-key is required!" });
   }
 
   switch (xGatewayServiceAuthType) {
@@ -42,7 +42,7 @@ app.all("*", async (context: AppContext) => {
       url.searchParams.append(xGatewayServiceAuthKey, tokenValue);
       break;
     default:
-      return context.json(<Error>{ error: "x-gateway-service-auth-type should be either of HEADER or QUERY" });
+      return context.json(<TError>{ error: "x-gateway-service-auth-type should be either of HEADER or QUERY" });
   }
 
   // Make the request to the designated service
@@ -58,6 +58,11 @@ app.all("*", async (context: AppContext) => {
   }
   // If the response is a stream, forward it as a stream.
   return streamResponse(response.body);
+});
+
+
+app.onError((err: Error, context: AppContext) => {
+  return context.json(<TError>{ error: err.message }, 500);
 });
 
 export default {

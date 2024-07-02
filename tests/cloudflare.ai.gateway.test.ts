@@ -123,4 +123,23 @@ describe("Cloudflare AI Gateway", () => {
     expect(request.identifier_for_vendor).toBe("ccc-ddd-eee");
     expect(request.status_code).toBe(200);
   });
+
+  it("should throw an error if the service type is not valid", async () => {
+    const response = await app.request(
+      "/v1/acc_123/gateway_123/openai/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "x-gateway-service-type": "INVALID",
+        },
+      },
+      BINDINGS,
+      new ExecutionContext(),
+    );
+
+    expect(response.status).toEqual(500);
+    expect(await response.json()).toMatchObject({
+      error: "Invalid service type",
+    });
+  });
 });

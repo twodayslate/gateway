@@ -3,7 +3,7 @@ export enum ServiceAuthType {
   QUERY = "QUERY",
 }
 
-export type Error = {
+export type TError = {
   error: string;
 };
 
@@ -16,7 +16,23 @@ export type D1ResultMeta = {
   size_after: number;
 };
 
-export enum ServiceType {
-  DIRECT = "DIRECT",
-  GATEWAY = "GATEWAY",
+export class ServiceType {
+  static DIRECT: "DIRECT" = "DIRECT";
+  static GATEWAY: "GATEWAY" = "GATEWAY";
+
+  static parse(value: string | null): TServiceType {
+    if (value === null) {
+      return ServiceType.DIRECT;
+    }
+
+    switch (value) {
+      case ServiceType.DIRECT:
+      case ServiceType.GATEWAY:
+        return value as TServiceType;
+      default:
+        throw new Error("Invalid service type");
+    }
+  }
 }
+
+export type TServiceType = typeof ServiceType.DIRECT | typeof ServiceType.GATEWAY;
