@@ -32,6 +32,13 @@ export function getMockDomainAvailabilityWhoIsXmlApi() {
   return fetchMock.get("http://domain-availability.whoisxmlapi.com");
 }
 
+export function getMockCloudflareAIGateway() {
+  const fetchMock = getMiniflareFetchMock();
+  fetchMock.disableNetConnect();
+
+  return fetchMock.get("http://gateway.ai.cloudflare.com");
+}
+
 export async function setInMemoryD1Database() {
   const db = new Database(":memory:");
   const migrations = fs.opendirSync("./migrations");

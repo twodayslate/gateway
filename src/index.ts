@@ -1,61 +1,48 @@
-import { Context, Hono } from "hono";
-import { Error, ServiceAuthType } from "./types";
+import { Hono } from "hono";
+import { TError, ServiceAuthType } from "./types";
 import { streamResponse } from "./utils";
-import { Bindings } from "./bindings";
+import { AppContext, Bindings, Variables } from "./bindings";
 import HeaderUtils from "./header_utils";
 import analytics from "./middleware/analytics";
+import validate from "./middleware/validate";
 import cron from "./crons/cron";
 
-export const app = new Hono<{ Bindings: Bindings }>();
+export const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 app.use("*", analytics());
+app.use("*", validate());
 
-app.all("*", async (context: Context<{Bindings: Bindings}>) => {
-  // Clone the request
+app.all("*", async (context: AppContext) => {
   const clone = context.req.raw.clone();
+  const url = new URL(clone.url);
+  const token = context.get("token");
 
   // Get the x-gateway-* headers
-  const xGatewayServiceHost = clone.headers.get("x-gateway-service-host");
-  const xGatewayServiceToken = clone.headers.get("x-gateway-service-token");
+  const xGatewayServiceHost = clone.headers.get("x-gateway-service-host")!;
   const xGatewayServiceAuthKey = clone.headers.get("x-gateway-service-auth-key");
   const xGatewayServiceAuthType = clone.headers.get("x-gateway-service-auth-type");
-  const xGatewayAuthorizationType = clone.headers.get("x-gateway-service-auth-prefix");
-
-  // Create a new URL object from the cloned request URL
-  const url = new URL(clone.url);
-
-  if (!xGatewayServiceHost) {
-    return context.json(<Error>{ error: "x-gateway-service-host header is required." }, 400);
-  }
+  const xGatewayAuthorizationPrefix = clone.headers.get("x-gateway-service-auth-prefix");
 
   // Set the host to the proxied service host
   url.host = xGatewayServiceHost;
 
-  // If the service token is not provided in the request headers, try to get it from the environment variables.
-  // The environment variable name is the service host name in uppercase with all non-alphanumeric characters replaced with "_".
-  const apiKey = `${url.host.replace(/[^a-zA-Z0-9]/g, "_").toUpperCase()}_API_KEY`;
-  const token = xGatewayServiceToken || context.env[apiKey];
+  // remove all x-gateway-* headers from the request
+  const headers = new HeaderUtils(clone.headers).removeGatewayHeaders().get();
+  const tokenValue = xGatewayAuthorizationPrefix ? `${xGatewayAuthorizationPrefix} ${token}` : token;
 
-  if (!token) {
-    return context.json(
-      <Error>{
-        error: "Cannot find API key for proxied service! Either provide it in the request headers or set it as an environment variable.",
-      },
-      400,
-    );
+  if (!xGatewayServiceAuthKey) {
+    return context.json(<TError>{ error: "x-gateway-service-auth-key is required!" });
   }
 
-  // remove all x-gateway-* headers from the request
-  const filteredHeaders = new HeaderUtils(clone.headers).removeGatewayHeaders().get();
-
-  // create a new headers object with the filtered headers
-  const headers = new Headers(filteredHeaders);
-
-  const tokenValue = xGatewayAuthorizationType ? `${xGatewayAuthorizationType} ${token}` : token;
-  if (xGatewayServiceAuthKey && xGatewayServiceAuthType === ServiceAuthType.HEADER) {
-    headers.append(xGatewayServiceAuthKey, tokenValue);
-  } else if (xGatewayServiceAuthKey && xGatewayServiceAuthType === ServiceAuthType.QUERY) {
-    url.searchParams.append(xGatewayServiceAuthKey, tokenValue);
+  switch (xGatewayServiceAuthType) {
+    case ServiceAuthType.HEADER:
+      headers.append(xGatewayServiceAuthKey, tokenValue);
+      break;
+    case ServiceAuthType.QUERY:
+      url.searchParams.append(xGatewayServiceAuthKey, tokenValue);
+      break;
+    default:
+      return context.json(<TError>{ error: "x-gateway-service-auth-type should be either of HEADER or QUERY" });
   }
 
   // Make the request to the designated service
@@ -71,6 +58,11 @@ app.all("*", async (context: Context<{Bindings: Bindings}>) => {
   }
   // If the response is a stream, forward it as a stream.
   return streamResponse(response.body);
+});
+
+
+app.onError((err: Error, context: AppContext) => {
+  return context.json(<TError>{ error: err.message }, 500);
 });
 
 export default {

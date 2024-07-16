@@ -1,12 +1,13 @@
 import { Bindings } from "../bindings";
 
-
 async function delete_old_data_cron(env: Bindings) {
-  const response = await env.DB.prepare(`
+  const response = await env.DB.prepare(
+    `
       DELETE
       FROM requests
       WHERE created_at < datetime('now', ?1)
-  `)
+  `,
+  )
     .bind(env.DELETE_OLD_DATA_BEFORE)
     .run();
 

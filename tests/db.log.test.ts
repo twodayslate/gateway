@@ -2,7 +2,6 @@ import { BINDINGS, getMockOpenAI, setInMemoryD1Database } from "./utils";
 import { app } from "../src";
 import { RequestModel } from "../src/d1/models";
 
-
 describe("it should have all the request logged to the requests table", () => {
   // This is a hack to make sure that the database is initialized before the tests are run
   beforeAll(async () => {

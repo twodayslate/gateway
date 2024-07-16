@@ -117,5 +117,4 @@ describe("Test if a request has all the details required to proxy the request to
       error: "Cannot find API key for proxied service! Either provide it in the request headers or set it as an environment variable.",
     });
   });
-
 });

@@ -55,5 +55,4 @@ describe("it should test all the proxied endpoints for domain-availability.whois
     expect(request.identifier_for_vendor).toBe("zzz-yyy-xxx");
     expect(request.status_code).toBe(200);
   });
-
 });

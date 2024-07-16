@@ -106,5 +106,4 @@ describe("it should test all the proxied endpoints for openai", () => {
     expect(request.status_code).toBe(200);
     expect(request.bundle_version).toBe("1.0.0");
   });
-
 });

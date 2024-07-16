@@ -2,6 +2,9 @@
   "name": "gateway",
   "version": "0.0.0",
   "private": true,
+  "overrides": {
+    "@types/node": "20.8.3"
+  },
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
