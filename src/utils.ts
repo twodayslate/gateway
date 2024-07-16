@@ -45,6 +45,6 @@ export function toEnvKey(str: string, ...suffix: (string | null | undefined)[]) 
 
   return suffix
     .filter(isNotNullOrUndefined)
-    .reduce((a, c) => a + `_${c}`, s)
+    .reduce((a, c) => a + `_${c.replace(/[^a-zA-Z0-9]/g, "_")}`, s)
     .toUpperCase();
 }
